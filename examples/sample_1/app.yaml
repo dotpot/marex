@@ -1,0 +1,21 @@
+application: marex_sample_1
+version: main
+runtime: python27
+api_version: 1
+threadsafe: true
+
+handlers:
+- url: /favicon\.ico
+  static_files: favicon.ico
+  upload: favicon\.ico
+
+- url: /mapreduce/pipeline/images
+  static_dir: mapreduce/lib/pipeline/ui/images
+
+- url: /mapreduce(/.*)?
+  script: mapreduce.main.APP
+  login: admin
+
+- url: .*
+  script: main.app
+  login: admin
