@@ -1,9 +1,10 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import argparse
 import os
 import shutil
 import sys
-import argparse
+import unittest
 
 VERBOSE = False
 
@@ -26,9 +27,17 @@ def _errwrite_verbose(line):
 def _argparser():
     parser = argparse.ArgumentParser(description='Build "marex" project examples.')
     parser.add_argument('-v', '--verbose', dest='verbose', action='store_true', help='Provide additional output.')
-    parser.add_argument('command', choices=['clean', 'build', 'rebuild'], default='rebuild', help='Command to execute.')
+    parser.add_argument('command', choices=['clean', 'build', 'rebuild', 'test'], default='rebuild', help='Command to execute.')
     parser.add_argument('targets', metavar='target', nargs='*', default=['all'], help='List of targets to (re)build.')
     return parser
+
+
+def test(*args):
+    if len(args) > 0 and (len(args) != 1 or args[0] != 'all'):
+        _errwrite('warning: command "test" only accepts one optional target "all", any other values are ignored.')
+    loader = unittest.TestLoader()
+    runner = unittest.TextTestRunner(verbosity=1 if VERBOSE else 0)
+    runner.run(loader.discover(PROJECT_PATH, pattern='*_test.py'))
 
 
 def clean(*args):
@@ -75,6 +84,7 @@ def rebuild(*args):
     clean(*args)
     build(*args)
 
+
 def main():
     parser = _argparser()
     args = parser.parse_args()
@@ -85,6 +95,7 @@ def main():
         'clean': clean,
         'build': build,
         'rebuild': rebuild,
+        'test': test,
     }
     commands[args.command](*args.targets)
 
