@@ -9,14 +9,15 @@ from tests.gaehelper import gaetestbed
 
 from marex.internal.blobstore import remove_files
 
+
 class RemoveFilesTests(unittest.TestCase):
     def setUp(self):
         def create_dummy_file(name=None):
             blobstore_filename = files.blobstore.create(
-                mime_type='text/plain',
+                mime_type="text/plain",
                 _blobinfo_uploaded_filename=name
             )
-            with files.open(blobstore_filename, 'a') as blobstore_file:
+            with files.open(blobstore_filename, "a") as blobstore_file:
                 blobstore_file.write("Lobster ALL the fetish!")
 
             files.finalize(blobstore_filename)
@@ -26,7 +27,7 @@ class RemoveFilesTests(unittest.TestCase):
         self.testbed = gaetestbed()
         self.testbed.activate('datastore', 'blobstore', 'files')
 
-        self.blob_keys = [create_dummy_file() for i in range(10)]
+        self.blob_keys = [create_dummy_file(name='file_{}.bin'.format(i)) for i in range(10)]
         self.blob_uris = [files.blobstore.get_file_name(blob_key) for blob_key in self.blob_keys]
         self.blob_infos = blobstore.BlobInfo.get(self.blob_keys)
 
