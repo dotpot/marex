@@ -11,9 +11,12 @@ VERBOSE = False
 PROJECT_PATH = os.path.abspath(os.path.dirname(__file__))
 BUILD_PATH = os.path.join(PROJECT_PATH, 'build')
 EXAMPLES_PATH = os.path.join(PROJECT_PATH, 'examples')
-MAREX_PATH = os.path.join(PROJECT_PATH, 'marex')
-LIB_PATH = os.path.join(PROJECT_PATH, 'lib')
 
+LIBRARIES = {
+    # core stuff
+    'marex': os.path.join(PROJECT_PATH, 'marex'),
+    'mapreduce': os.path.join(PROJECT_PATH, 'mapreduce'),
+}
 
 def _errwrite(line):
     sys.stderr.write('{0}\n'.format(line))
@@ -43,8 +46,9 @@ def test(*args):
 def clean(*args):
     if len(args) == 0 or (len(args) == 1 and args[0] == 'all'):
         _errwrite_verbose('Clean all')
-        args = os.listdir(BUILD_PATH)
-        clean(*args)
+        if os.path.exists(BUILD_PATH):
+            args = os.listdir(BUILD_PATH)
+            clean(*args)
     elif len(args) > 1:
         for arg in args:
             clean(arg)
@@ -72,13 +76,10 @@ def build(*args):
         target_path = os.path.join(BUILD_PATH, name)
         shutil.copytree(source_path, target_path)
 
-        marex_target_path = os.path.join(target_path, 'marex')
-        shutil.copytree(MAREX_PATH, marex_target_path)
-
-        for library in os.listdir(LIB_PATH):
-            library_source_path = os.path.join(LIB_PATH, library)
+        for library, library_source_path in LIBRARIES.items():
             library_target_path = os.path.join(target_path, library)
             shutil.copytree(library_source_path, library_target_path)
+
 
 def rebuild(*args):
     clean(*args)
