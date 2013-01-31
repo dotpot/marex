@@ -3,13 +3,18 @@
 from google.appengine.api import files
 from google.appengine.ext import blobstore
 
-def remove_files(*args):
+def remove_files(*args, **kwargs):
     """
     Attempts to delete all blobs identified by passed in positional arguments. Arguments can be a mixture of BlobKey,
     BlobInfo and str or unicode instances, where in case of strings it should be either a string representation of
     BlobKey or a string representation of blob URI (see google.appengine.api.files.blobstore.get_file_name() function).
     """
-    if len(args) == 0:
+    accepted_kwargs = ['ignore_errors']
+    ignore_errors = kwargs.get('ignore_errors', False)
+    if len(filter(lambda kwarg: kwarg not in accepted_kwargs, kwargs)) > 0 and not ignore_errors:
+        raise NameError("Accepted keyword arguments are {0}".format(accepted_kwargs))
+
+    if len(args) == 0 and not ignore_errors:
         raise ValueError("No arguments were given")
 
     blob_keys = []
@@ -31,7 +36,8 @@ def remove_files(*args):
                 blob_keys.append(blob_key)
         else:
             # unrecognized type
-            raise TypeError("All arguments must be instances of 'BlobInfo', 'BlobKey' or 'basestring', got '{0}' instead".format(type(arg).__name__))
+            if not ignore_errors:
+                raise TypeError("All arguments must be instances of 'BlobInfo', 'BlobKey' or 'basestring', got '{0}' instead".format(type(arg).__name__))
 
     blob_keys_unique = set(blob_keys)
     blob_keys = list(blob_keys_unique)
